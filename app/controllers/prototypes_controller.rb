@@ -1,5 +1,7 @@
 class PrototypesController < ApplicationController
-  before_action :authenticate_user!, except: [:show, :index ]
+  before_action :authenticate_user!, except: [:show, :index]
+  before_action :set_prototype, only: [:edit, :update, :destroy]
+  before_action :authorize_user, only: [:edit, :update, :destroy]
 
   def index
     @prototypes = Prototype.all
@@ -52,4 +54,13 @@ class PrototypesController < ApplicationController
       params.require(:prototype).permit(:title, :catch_copy, :concept, :image).merge(user_id: current_user.id)
     end
   
+    def set_prototype
+      @prototype = Prototype.find(params[:id])
+    end
+
+    def authorize_user
+      unless @prototype.user == current_user
+        redirect_to root_path, alert: "他のユーザーのプロトタイプは編集できません。"
+      end
+    end
 end
